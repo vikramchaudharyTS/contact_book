@@ -75,20 +75,6 @@ export const useContactStore = create((set, get) => ({
     }
   },
 
-  dummyRequest: async () => {
-    try {
-      const response = await axiosInstance.get('/dummy', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      });
-      console.log(response.data);
-    } catch (error) {
-      console.log(error.message);
-      set({ error: error.message, loading: false });
-    }
-  },
-
-
-  
   // Fetch all contacts
   getAllContacts: async () => {
     set({ loading: true });
@@ -114,57 +100,7 @@ export const useContactStore = create((set, get) => ({
       set({ error: error.message, loading: false });
     }
   },
-  
-  //   // Edit a contact
-  //   editContact: async (id, contactData) => {
-  //     set({ loading: true });
-  //     try {
-  //       const response = await axiosInstance.put(`/contacts/edit/${id}`, contactData, {
-  //         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  //       });
-  //       const updatedContacts = get().contacts.map(contact =>
-  //         contact._id === id ? response.data : contact
-  //       );
-  //       set({ contacts: updatedContacts, loading: false });
-  //     } catch (error) {
-  //       set({ error: error.message, loading: false });
-  //     }
-  //   },
 
-  // // Soft delete a contact
-  // deleteContact: async (id) => {
-  //   set({ loading: true });
-  //   try {
-  //     const response = await axiosInstance.put(`/contacts/delete/${id}`, null, {
-  //       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  //     });
-  //     set({
-  //       contacts: get().contacts.filter((contact) => contact._id !== id),
-  //       loading: false,
-  //     });
-  //   } catch (error) {
-  //     set({ error: error.message, loading: false });
-  //   }
-  // },
-
-  // // Restore a soft deleted contact
-  // restoreContact: async (id) => {
-  //   set({ loading: true });
-  //   try {
-  //     const response = await axiosInstance.put(`/contacts/restore/${id}`, null, {
-  //       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  //     });
-  //     set({
-  //       contacts: get().contacts.map((contact) =>
-  //         contact._id === id ? response.data : contact
-  //       ),
-  //       loading: false,
-  //     });
-  //   } catch (error) {
-  //     set({ error: error.message, loading: false });
-  //   }
-  // },
-  
   // Soft delete contact
   softDeleteContact: async (contactId, token) => {
     set({ isLoading: true });
@@ -182,23 +118,40 @@ export const useContactStore = create((set, get) => ({
       set({ error: error.response?.data?.message || 'Failed to delete contact', isLoading: false });
     }
   },
-  
 
-  // Edit a contact
-  editContact: async (contactId, updatedData, token) => {
-    set({ isLoading: true });
+   // Function to fetch editable contact data
+   fetchEditableContact: async (contactId) => {
+    set({ loading: true, error: null });
     try {
-      const response = await axiosInstance.put(`/contacts/${contactId}`, updatedData, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axiosInstance.get(`/contacts/edit/${contactId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      set({ editableContact: response.data.contact, loading: false });
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || 'Failed to fetch contact data',
+        loading: false,
+      });
+    }
+  },
+
+  // update a contact
+  updateContact: async (contactId, updatedData) => {
+    set({ loading: true });
+    try {
+      console.log(contactId, updatedData);
+      const response = await axiosInstance.put(`/contacts/edit/${contactId}`, updatedData, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       set((state) => ({
         contacts: state.contacts.map((contact) =>
           contact.id === contactId ? { ...contact, ...response.data } : contact
         ),
-        isLoading: false,
+        loading: false,
       }));
     } catch (error) {
-      set({ error: error.response?.data?.message || 'Failed to update contact', isLoading: false });
+      console.log(error.message);
+      set({ error: error.response?.data?.message || 'Failed to update contact', loading: false });
     }
   },
 }));

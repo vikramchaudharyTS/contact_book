@@ -7,8 +7,9 @@ import { FaSearch } from "react-icons/fa";
 import AddContact from '../components/AddContacts';
 import Pagination from '../components/Pagination'; // Import the Pagination component
 import SoftDelete from '../components/SoftDelete';
+import EditContact from '../components/EditContact';
 
-const ITEMS_PER_PAGE = 5; // Moved outside the useEffect to avoid redefinition
+const ITEMS_PER_PAGE = 5;
 
 const Dashboard = () => {
   const { user, token, logOut } = useAuthStore(); // Auth state
@@ -20,6 +21,18 @@ const Dashboard = () => {
   const [trackRestore, setTrackRestore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedContactId, setSelectedContactId] = useState(null);
+
+  const handleEditClick = (contactId) => {
+    setSelectedContactId(contactId);
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setSelectedContactId(null);
+    setIsEditModalOpen(false);
+  };
 
   // Fetch contacts with pagination
   useEffect(() => {
@@ -35,7 +48,7 @@ const Dashboard = () => {
           params: { limit: ITEMS_PER_PAGE, offset: (currentPage - 1) * ITEMS_PER_PAGE },
         });
 
-        setContacts(response.data.contacts); // Update contacts state
+        setContacts(response.data.contacts || []); // Update contacts state
         setTotalPages(Math.ceil(response.data.total / ITEMS_PER_PAGE)); // Use `total` instead of `totalCount` based on API response
         setIsLoading(false);
       } catch (error) {
@@ -66,19 +79,28 @@ const Dashboard = () => {
 
   return (
     <div>
+      {/* Modals */}
       {trackContact && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
           <AddContact setTrackContacts={setTrackContacts} />
         </div>
       )}
-
       {trackRestore && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
           <SoftDelete setTrackRestore={setTrackRestore} />
         </div>
       )}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+          <EditContact
+            contactId={selectedContactId}
+            closeEditModal={closeEditModal}
+          />
+        </div>
+      )}
 
       <div className="dashboard-container bg-gray-900 text-white min-h-screen flex flex-col w-[100vw]">
+        {/* Header */}
         <header className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500 to-emerald-600">
           <h1 className="text-2xl font-bold">Welcome to the Dashboard</h1>
           <button
@@ -89,7 +111,9 @@ const Dashboard = () => {
           </button>
         </header>
 
+        {/* Main Content */}
         <main className="flex-1 p-6">
+          {/* Profile Info */}
           <section className="profile-info mb-8">
             <h2 className="text-xl font-semibold mb-2">Profile Information</h2>
             <div className="bg-zinc-800 p-4 rounded-lg shadow-md">
@@ -98,6 +122,7 @@ const Dashboard = () => {
             </div>
           </section>
 
+          {/* Contacts Section */}
           <section className="contacts mb-8">
             <div className="flex p-2">
               <h2 className="text-xl flex items-center justify-start font-semibold mb-2 w-full">
@@ -105,13 +130,18 @@ const Dashboard = () => {
                 <div className="pl-10"><Search /></div>
                 <button className="pl-3"><FaSearch /></button>
               </h2>
-              <button onClick={() => setTrackRestore(!trackRestore)} className="font-semibold w-40 bg-red-500 flex items-center justify-center rounded-md mr-4 cursor-pointer hover:bg-red-600">Restore contacts</button>
-              <h2
+              <button
+                onClick={() => setTrackRestore(!trackRestore)}
+                className="font-semibold w-40 bg-red-500 flex items-center justify-center rounded-md mr-4 cursor-pointer hover:bg-red-600"
+              >
+                Restore contacts
+              </button>
+              <button
                 onClick={() => setTrackContacts(!trackContact)}
                 className="font-semibold w-32 bg-sky-500 flex items-center justify-center rounded-md cursor-pointer hover:bg-sky-600"
               >
                 Add Contact
-              </h2>
+              </button>
             </div>
 
             <div className="bg-zinc-800 p-4 rounded-lg shadow-md">
@@ -125,7 +155,7 @@ const Dashboard = () => {
                         </span>
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => editContact(contact.id, { first_name: 'Updated' })}
+                            onClick={() => handleEditClick(contact.id)}
                             className="px-3 py-1 bg-blue-500 rounded-lg text-white hover:bg-blue-600"
                           >
                             Edit

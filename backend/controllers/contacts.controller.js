@@ -130,15 +130,28 @@ export const editContact = async (req, res) => {
   }
 };
 
-export const dummyRequest = async (req, res)=>{
+// Get editable contact data
+export const getEditableContact = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const [rows] = await db.query(`SELECT * from contacts`)
-    return res.json(rows);
+    const [contact] = await db.query(
+      `SELECT first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address 
+           FROM contacts 
+           WHERE id = ? AND user_id = ? AND is_deleted = FALSE`,
+      [id, req.userId]
+    );
+
+    if (!contact) {
+      return res.status(404).json({ message: 'Contact not found or not authorized' });
+    }
+
+    res.json({ contact });
   } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ message: 'Failed to fetch contacts', error });
+    res.status(500).json({ message: 'Failed to retrieve contact', error });
   }
-}
+};
+
 
 // View all contacts (paginated)
 export const getAllContacts = async (req, res) => {
