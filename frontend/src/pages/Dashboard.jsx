@@ -1,50 +1,41 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore, useContactStore } from '../store/store'; // Importing Zustand stores
+import { useAuthStore, useContactStore } from '../store/store'; // Zustand stores
 import { axiosInstance } from '../utils/axios'; // Axios instance
 import Search from '../components/Search';
 import { FaSearch } from "react-icons/fa";
 import AddContact from '../components/AddContacts';
+import Pagination from '../components/Pagination'; // Import the Pagination component
+
+const ITEMS_PER_PAGE = 5; // Moved outside the useEffect to avoid redefinition
 
 const Dashboard = () => {
-  const { user, token, logOut } = useAuthStore(); // Accessing user and token from Zustand store
-  const { contacts, setContacts, softDeleteContact, restoreContact, editContact } = useContactStore(); // Accessing contact state and actions from Zustand store
-  const navigate = useNavigate(); // For navigation
-  const [isLoading, setIsLoading] = useState(true); // State for loading indication
-  const [trackContact, setTrackContacts] = useState(false); // State for tracking contact
-  const [currentPage, setCurrentPage] = useState(1); // State for current page
-  const [totalPages, setTotalPages] = useState(1); // State for total pages
+  const { user, token, logOut } = useAuthStore(); // Auth state
+  const { contacts, setContacts, softDeleteContact, restoreContact, editContact } = useContactStore(); // Contact state
+  const navigate = useNavigate();
 
-  const ITEMS_PER_PAGE = 5; // Max number of contacts per page
+  const [isLoading, setIsLoading] = useState(true);
+  const [trackContact, setTrackContacts] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch user data (contacts in this case)
+  // Fetch contacts with pagination
   useEffect(() => {
-    if (!token) {
-      navigate('/login'); // Redirect to login if token is not available
-      return;
-    }
-
     const fetchContacts = async () => {
       try {
-        const token = localStorage.getItem('token');
-
         if (!token) {
-          navigate('/login'); // Redirect to login if no token is found
+          navigate('/login');
           return;
         }
 
         const response = await axiosInstance.get('/contacts/search-all', {
           headers: { Authorization: `Bearer ${token}` },
+          params: { limit: ITEMS_PER_PAGE, offset: (currentPage - 1) * ITEMS_PER_PAGE },
         });
 
-        // Pagination logic: Only set the contacts for the current page
-        const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
-        const paginatedContacts = response.data.contacts.slice(startIdx, startIdx + ITEMS_PER_PAGE);
-
-        setContacts(paginatedContacts);  // Set contacts for the current page
-        setTotalPages(Math.ceil(response.data.contacts.length / ITEMS_PER_PAGE)); // Set total pages based on total contacts
-
-        setIsLoading(false); // Stop loading state
+        setContacts(response.data.contacts); // Update contacts state
+        setTotalPages(Math.ceil(response.data.total / ITEMS_PER_PAGE)); // Use `total` instead of `totalCount` based on API response
+        setIsLoading(false);
       } catch (error) {
         console.error('Failed to fetch contacts:', error);
         setIsLoading(false);
@@ -54,27 +45,22 @@ const Dashboard = () => {
     fetchContacts();
   }, [token, currentPage, setContacts, navigate]);
 
-  // Handle logout
+  // Logout logic
   const handleLogout = async () => {
-    await logOut(); // Clear user and token from store
-    navigate('/login'); // Navigate to login page
+    await logOut();
+    navigate('/login');
   };
 
+  // Pagination handlers
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1); // Go to next page
-    }
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
   const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1); // Go to previous page
-    }
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>; // Display loading message
-  }
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
@@ -105,15 +91,15 @@ const Dashboard = () => {
           </section>
 
           <section className="contacts mb-8">
-            <div className='flex p-2'>
+            <div className="flex p-2">
               <h2 className="text-xl flex items-center justify-start font-semibold mb-2 w-full">
                 Your Contacts
-                <div className='pl-10'><Search /></div>
-                <button className='pl-3'><FaSearch /></button>
+                <div className="pl-10"><Search /></div>
+                <button className="pl-3"><FaSearch /></button>
               </h2>
               <h2
                 onClick={() => setTrackContacts(!trackContact)}
-                className='font-semibold w-28 bg-sky-500 flex items-center justify-center rounded-md cursor-pointer hover:bg-sky-600'
+                className="font-semibold w-28 bg-sky-500 flex items-center justify-center rounded-md cursor-pointer hover:bg-sky-600"
               >
                 Add Contact
               </h2>
@@ -161,22 +147,12 @@ const Dashboard = () => {
             </div>
 
             {/* Pagination Controls */}
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={handlePrevPage}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <button
-                onClick={handleNextPage}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              handleNextPage={handleNextPage}
+              handlePrevPage={handlePrevPage}
+            />
           </section>
         </main>
       </div>

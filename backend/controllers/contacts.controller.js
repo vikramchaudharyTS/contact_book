@@ -133,24 +133,31 @@ export const editContact = async (req, res) => {
 // View all contacts (paginated)
 export const getAllContacts = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit, 7) || 7; // Default to 10 contacts per page
-    const offset = parseInt(req.query.offset, 7) || 0;
+    const limit = parseInt(req.query.limit, 10) || 5; // Default to 5 contacts per page
+    const offset = parseInt(req.query.offset, 10) || 0;
 
     const [rows] = await db.query(
       `SELECT id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address, created_at, updated_at 
-   FROM contacts 
-   WHERE user_id = ? AND is_deleted = FALSE 
-   ORDER BY created_at DESC 
-   LIMIT ? OFFSET ?`,
+       FROM contacts 
+       WHERE user_id = ? AND is_deleted = FALSE 
+       ORDER BY created_at DESC 
+       LIMIT ? OFFSET ?`,
       [req.userId, limit, offset]
     );
 
-    res.json({ contacts: rows, limit, offset });
+    const [[{ total }]] = await db.query(
+      `SELECT COUNT(*) as total 
+       FROM contacts 
+       WHERE user_id = ? AND is_deleted = FALSE`,
+      [req.userId]
+    );
 
+    res.json({ contacts: rows, total });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch contacts', error });
   }
 };
+
 
 // Search contacts
 export const getOneContact = async (req, res) => {
