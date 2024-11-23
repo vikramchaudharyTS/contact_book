@@ -4,7 +4,7 @@ import { axiosInstance } from '../utils/axios.js';
 // Auth store to manage user and token
 export const useAuthStore = create((set) => ({
     user: null,
-    token: null,
+    token: null, // Load token from localStorage
     error: null,
     isLoading: false,
 

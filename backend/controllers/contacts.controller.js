@@ -2,6 +2,50 @@ import db from '../models/schema.js';
 
 
 // Get user profile with contacts
+export const searchContacts = async (req, res) => {
+  const query = req.body; // Search term from the request body
+
+  if (!query) {
+    return res.status(400).json({ message: 'Search query is required' });
+  }
+
+  try {
+    // Create a case-insensitive regular expression for the search term
+    const regex = new RegExp(query, 'i'); // 'i' makes the search case-insensitive
+
+    // Build the WHERE clause dynamically to only use REGEXP when query is provided
+    const whereClause = [
+      'first_name REGEXP ?',
+      'middle_name REGEXP ?',
+      'last_name REGEXP ?',
+      'email REGEXP ?',
+      'phone_number_1 REGEXP ?',
+      'phone_number_2 REGEXP ?',
+    ];
+
+    // Query the database to search across multiple fields
+    const [contacts] = await db.query(
+      `SELECT id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address, created_at
+       FROM contacts
+       WHERE user_id = ? AND is_deleted = FALSE
+       AND (${whereClause.join(' OR ')})
+       ORDER BY created_at DESC`,
+      [req.userId, regex, regex, regex, regex, regex, regex]
+    );
+
+    if (contacts.length === 0) {
+      return res.status(404).json({ message: 'No contacts found matching your query' });
+    }
+
+    res.json({ contacts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error occurred while searching contacts', error });
+  }
+};
+
+
+// Get user profile with contacts
 export const getUserProfile = async (req, res) => {
   const userId = req.userId; // Assuming userId is set by middleware
 
@@ -12,7 +56,7 @@ export const getUserProfile = async (req, res) => {
   try {
     // First, fetch the user's profile data (name, email, etc.)
     const [userProfile] = await db.query(
-      'SELECT id, username, email, created_at FROM users WHERE id = ?',
+      'SELECT id, username, email, created_at, updated_at FROM users WHERE id = ?',
       [userId]
     );
 
@@ -22,7 +66,7 @@ export const getUserProfile = async (req, res) => {
 
     // Now fetch the user's contacts
     const [contacts] = await db.query(
-      `SELECT id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address, created_at 
+      `SELECT id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address, created_at, updated_at 
        FROM contacts 
        WHERE user_id = ? AND is_deleted = FALSE 
        ORDER BY created_at DESC`,
@@ -47,18 +91,18 @@ export const addContact = async (req, res) => {
   const { first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address } = req.body;
   const userId = req.userId; // This should be set by the middleware
   if (!userId) {
-      return res.status(400).json({ message: "User ID is missing" });
+    return res.status(400).json({ message: "User ID is missing" });
   }
 
   try {
-      const query = 'INSERT INTO contacts (user_id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-      const values = [userId, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address];
+    const query = 'INSERT INTO contacts (user_id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    const values = [userId, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address];
 
-      const [result] = await db.query(query, values);
-      res.status(201).json({ message: 'Contact added successfully', contactId: result.insertId });
+    const [result] = await db.query(query, values);
+    res.status(201).json({ message: 'Contact added successfully', contactId: result.insertId });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Failed to add contact', error: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Failed to add contact', error: error.message });
   }
 };
 
@@ -89,8 +133,8 @@ export const editContact = async (req, res) => {
 // View all contacts (paginated)
 export const getAllContacts = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit, 5) || 5; // Default to 10 contacts per page
-    const offset = parseInt(req.query.offset, 5) || 0;
+    const limit = parseInt(req.query.limit, 7) || 7; // Default to 10 contacts per page
+    const offset = parseInt(req.query.offset, 7) || 0;
 
     const [rows] = await db.query(
       `SELECT id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address, created_at, updated_at 
