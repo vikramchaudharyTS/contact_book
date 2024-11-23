@@ -1,5 +1,47 @@
 import db from '../models/schema.js';
 
+
+// Get user profile with contacts
+export const getUserProfile = async (req, res) => {
+  const userId = req.userId; // Assuming userId is set by middleware
+
+  if (!userId) {
+    return res.status(400).json({ message: 'User ID is missing' });
+  }
+
+  try {
+    // First, fetch the user's profile data (name, email, etc.)
+    const [userProfile] = await db.query(
+      'SELECT id, username, email, created_at FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (!userProfile || userProfile.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Now fetch the user's contacts
+    const [contacts] = await db.query(
+      `SELECT id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address, created_at 
+       FROM contacts 
+       WHERE user_id = ? AND is_deleted = FALSE 
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+
+    // Combine user profile data and contacts
+    const profileData = {
+      user: userProfile[0],
+      contacts: contacts || [],
+    };
+
+    res.json(profileData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch user profile', error });
+  }
+};
+
 // Add a new contact
 export const addContact = async (req, res) => {
   const { first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address } = req.body;

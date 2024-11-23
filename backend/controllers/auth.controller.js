@@ -20,11 +20,11 @@ export const register = async (req, res) => {
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
+    console.error("Error during registration:", error);  
     res.status(500).json({ message: 'Server error', error });
   }
 };
 
-// Login a user
 // Login a user
 export const login = async (req, res) => {
   const { email, password } = req.body;
@@ -45,7 +45,7 @@ export const login = async (req, res) => {
 
     // Pass user.id to generate the token
     const token = generateTokenAndSetCookie(res, user.id); // changed user._id to user.id
-    res.json({ token });
+    res.json({ token, user });
 
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
