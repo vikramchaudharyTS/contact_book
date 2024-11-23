@@ -12,7 +12,7 @@ const ITEMS_PER_PAGE = 5; // Moved outside the useEffect to avoid redefinition
 
 const Dashboard = () => {
   const { user, token, logOut } = useAuthStore(); // Auth state
-  const { contacts, setContacts, softDeleteContact, editContact, deletedContacts } = useContactStore(); // Contact state
+  const { contacts, setContacts, softDeleteContact, editContact } = useContactStore(); // Contact state
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);

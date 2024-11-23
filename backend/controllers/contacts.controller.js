@@ -248,3 +248,31 @@ export const restoreSoftDeletedContact = async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 };
+
+export const getOnlyDeletedContacts = async (req, res) => {
+  const user_id = req.userId; // The ID of the logged-in user
+  try {
+    // Fetch deleted contacts from the database
+    const result = await db.query(
+      'SELECT id, first_name, last_name, email FROM contacts WHERE user_id = ? AND is_deleted = TRUE',
+      [user_id]
+    );
+
+    // The result might contain both the data and schema/metadata
+    const contacts = result[0]; // Get the first element, which contains the contact data
+
+    // Map through the contacts to return only necessary fields
+    const deletedContacts = contacts.map(contact => ({
+      id: contact.id,
+      first_name: contact.first_name,
+      last_name: contact.last_name,
+      email: contact.email
+    }));
+
+    // Send the contacts back as a response
+    res.json(deletedContacts);
+  } catch (error) {
+    console.error('Error fetching deleted contacts:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
