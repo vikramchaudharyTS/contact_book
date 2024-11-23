@@ -222,7 +222,6 @@ export const softDeleteContact = async (req, res) => {
   }
 };
 
-// Restore a soft-deleted contact
 export const restoreSoftDeletedContact = async (req, res) => {
   const contactId = req.params.id;
   const user_id = req.userId;
@@ -237,15 +236,15 @@ export const restoreSoftDeletedContact = async (req, res) => {
       return res.status(404).json({ message: 'Contact not found or already processed' });
     }
 
-
     // Restore the contact by unmarking it as deleted
     await db.query(
       'UPDATE contacts SET is_deleted = FALSE, deleted_at = NULL WHERE id = ?',
       [contactId]
     );
 
-    res.json({ message: 'Contact restored successfully' });
+    res.json({ message: 'Contact restored successfully', contactId });
   } catch (error) {
+    console.error('Error restoring contact:', error);  // Add error logging
     res.status(500).json({ message: 'Server error', error });
   }
 };

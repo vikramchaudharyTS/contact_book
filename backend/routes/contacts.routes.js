@@ -12,6 +12,6 @@ router.get('/search-all', verifyToken, getAllContacts)
 router.get('/search-one/:id', verifyToken, getOneContact)
 router.put('/delete/:id', verifyToken, softDeleteContact)
 router.put('/restore/:id', verifyToken, restoreSoftDeletedContact)
-router.get('/dummy/', verifyToken, dummyRequest)
+router.get('/dummy', verifyToken, dummyRequest)
 
 export default router;

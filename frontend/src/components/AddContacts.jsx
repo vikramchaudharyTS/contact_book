@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { useContactStore } from '../store/store.js'; // Assuming you have this store in the right path
 
 const AddContact = ({ setTrackContacts }) => {
-  const { addContact, error, loading, dummyRequest } = useContactStore((state) => state);  // Destructure the necessary methods and state
+  const { addContact, error, loading } = useContactStore((state) => state);  // Destructure the necessary methods and state
+  const [isOpen, setIsOpen] = useState(true); // State to manage the visibility of the form
   const [formData, setFormData] = useState({
-    firstName: '',
-    middleName: '',
-    lastName: '',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
     email: '',
-    phone1: '',
-    phone2: '',
+    phone_number_1: '',
+    phone_number_2: '',
     address: '',
   });
-  const [isOpen, setIsOpen] = useState(true); // State to manage the visibility of the form
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -23,22 +23,23 @@ const AddContact = ({ setTrackContacts }) => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.email) {
+    if (!formData.first_name || !formData.email) {
       console.error('First name and email are required');
       return;
     }
     try {
       await addContact(formData);
-      await dummyRequest();
       setFormData({
-        firstName: '',
-        middleName: '',
-        lastName: '',
+        first_name: '',
+        middle_name: '',
+        last_name: '',
         email: '',
-        phone1: '',
-        phone2: '',
+        phone_number_1: '',
+        phone_number_2: '',
         address: '',
       });
+      setIsOpen(false); 
+      setTrackContacts(false); 
     } catch (err) {
       console.error(err);
     }
@@ -61,7 +62,8 @@ const AddContact = ({ setTrackContacts }) => {
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-            <path strokeLinecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+
           </svg>
         </button>
 
@@ -71,13 +73,13 @@ const AddContact = ({ setTrackContacts }) => {
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* First Name */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-            <label className="block text-sm font-medium text-gray-700 sm:w-32" htmlFor="firstName">
+            <label className="block text-sm font-medium text-gray-700 sm:w-32" htmlFor="first_name">
               First Name
             </label>
             <input
               type="text"
-              id="firstName"
-              value={formData.firstName}
+              id="first_name"
+              value={formData.first_name}
               onChange={handleInputChange}
               className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />
@@ -85,13 +87,13 @@ const AddContact = ({ setTrackContacts }) => {
 
           {/* Middle Name */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-            <label className="block text-sm font-medium text-gray-700 sm:w-32" htmlFor="middleName">
+            <label className="block text-sm font-medium text-gray-700 sm:w-32" htmlFor="middle_name">
               Middle Name
             </label>
             <input
               type="text"
-              id="middleName"
-              value={formData.middleName}
+              id="middle_name"
+              value={formData.middle_name}
               onChange={handleInputChange}
               className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />
@@ -99,13 +101,13 @@ const AddContact = ({ setTrackContacts }) => {
 
           {/* Last Name */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-            <label className="block text-sm font-medium text-gray-700 sm:w-32" htmlFor="lastName">
+            <label className="block text-sm font-medium text-gray-700 sm:w-32" htmlFor="last_name">
               Last Name
             </label>
             <input
               type="text"
-              id="lastName"
-              value={formData.lastName}
+              id="last_name"
+              value={formData.last_name}
               onChange={handleInputChange}
               className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />
@@ -127,13 +129,13 @@ const AddContact = ({ setTrackContacts }) => {
 
           {/* Phone Number 1 */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-            <label className="block text-sm font-medium text-gray-700 sm:w-32" htmlFor="phone1">
+            <label className="block text-sm font-medium text-gray-700 sm:w-32" htmlFor="phone_number_1">
               Phone Number 1
             </label>
             <input
               type="tel"
-              id="phone1"
-              value={formData.phone1}
+              id="phone_number_1"
+              value={formData.phone_number_1}
               onChange={handleInputChange}
               className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />
@@ -141,13 +143,13 @@ const AddContact = ({ setTrackContacts }) => {
 
           {/* Phone Number 2 */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-            <label className="block text-sm font-medium text-gray-700 sm:w-32" htmlFor="phone2">
+            <label className="block text-sm font-medium text-gray-700 sm:w-32" htmlFor="phone_number_2">
               Phone Number 2
             </label>
             <input
               type="tel"
-              id="phone2"
-              value={formData.phone2}
+              id="phone_number_2"
+              value={formData.phone_number_2}
               onChange={handleInputChange}
               className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />

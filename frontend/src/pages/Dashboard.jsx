@@ -6,16 +6,18 @@ import Search from '../components/Search';
 import { FaSearch } from "react-icons/fa";
 import AddContact from '../components/AddContacts';
 import Pagination from '../components/Pagination'; // Import the Pagination component
+import SoftDelete from '../components/SoftDelete';
 
 const ITEMS_PER_PAGE = 5; // Moved outside the useEffect to avoid redefinition
 
 const Dashboard = () => {
   const { user, token, logOut } = useAuthStore(); // Auth state
-  const { contacts, setContacts, softDeleteContact, restoreContact, editContact } = useContactStore(); // Contact state
+  const { contacts, setContacts, softDeleteContact, editContact, deletedContacts } = useContactStore(); // Contact state
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
   const [trackContact, setTrackContacts] = useState(false);
+  const [trackRestore, setTrackRestore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -70,6 +72,12 @@ const Dashboard = () => {
         </div>
       )}
 
+      {trackRestore && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+          <SoftDelete setTrackRestore={setTrackRestore} />
+        </div>
+      )}
+
       <div className="dashboard-container bg-gray-900 text-white min-h-screen flex flex-col w-[100vw]">
         <header className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500 to-emerald-600">
           <h1 className="text-2xl font-bold">Welcome to the Dashboard</h1>
@@ -97,9 +105,10 @@ const Dashboard = () => {
                 <div className="pl-10"><Search /></div>
                 <button className="pl-3"><FaSearch /></button>
               </h2>
+              <button onClick={() => setTrackRestore(!trackRestore)} className="font-semibold w-40 bg-red-500 flex items-center justify-center rounded-md mr-4 cursor-pointer hover:bg-red-600">Restore contacts</button>
               <h2
                 onClick={() => setTrackContacts(!trackContact)}
-                className="font-semibold w-28 bg-sky-500 flex items-center justify-center rounded-md cursor-pointer hover:bg-sky-600"
+                className="font-semibold w-32 bg-sky-500 flex items-center justify-center rounded-md cursor-pointer hover:bg-sky-600"
               >
                 Add Contact
               </h2>
@@ -108,7 +117,7 @@ const Dashboard = () => {
             <div className="bg-zinc-800 p-4 rounded-lg shadow-md">
               {contacts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {contacts.map((contact) => (
+                  {contacts.filter(contact => !contact.isDeleted).map((contact) => (
                     <div key={contact.id} className="contact-card bg-gray-700 p-4 rounded-lg shadow-md">
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-lg font-semibold">
@@ -126,12 +135,6 @@ const Dashboard = () => {
                             className="px-3 py-1 bg-red-500 rounded-lg text-white hover:bg-red-600"
                           >
                             Soft Delete
-                          </button>
-                          <button
-                            onClick={() => restoreContact(contact.id)}
-                            className="px-3 py-1 bg-green-500 rounded-lg text-white hover:bg-green-600"
-                          >
-                            Restore
                           </button>
                         </div>
                       </div>
