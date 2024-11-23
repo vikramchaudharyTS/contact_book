@@ -58,6 +58,7 @@ export const useContactStore = create((set, get) => ({
   contacts: [],
   loading: false,
   error: null,
+  editableContact: null,
 
   setContacts: (contacts) => set({ contacts }),  // Ensure this is defined
 
@@ -119,27 +120,31 @@ export const useContactStore = create((set, get) => ({
     }
   },
 
-   // Function to fetch editable contact data
-   fetchEditableContact: async (contactId) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await axiosInstance.get(`/contacts/edit/${contactId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      });
-      set({ editableContact: response.data.contact, loading: false });
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || 'Failed to fetch contact data',
-        loading: false,
-      });
-    }
-  },
+   
+  // Function to fetch editable contact data
+fetchEditableContact: async (contactId) => {
+  set({ loading: true, error: null });
+  try {
+    const response = await axiosInstance.get(`/contacts/edit/${contactId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+
+    const contact = Array.isArray(response.data.contact) ? response.data.contact[0] : response.data.contact;
+    
+    set({ editableContact: contact, loading: false }); 
+  } catch (error) {
+    set({
+      error: error.response?.data?.message || 'Failed to fetch contact data',
+      loading: false,
+    });
+  }
+},
+
 
   // update a contact
   updateContact: async (contactId, updatedData) => {
     set({ loading: true });
     try {
-      console.log(contactId, updatedData);
       const response = await axiosInstance.put(`/contacts/edit/${contactId}`, updatedData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });

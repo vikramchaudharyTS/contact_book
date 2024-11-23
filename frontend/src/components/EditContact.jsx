@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useContactStore } from '../store/store'; // Assuming the store is in the right path
 
 const EditContact = ({ contactId, closeEditModal }) => {
-  const { updateContact, editableContact, error, loading } = useContactStore((state) => state);
+  const { updateContact, editableContact, error, loading, fetchEditableContact } = useContactStore((state) => state);
   const [formData, setFormData] = useState({
     first_name: '',
     middle_name: '',
@@ -14,18 +14,27 @@ const EditContact = ({ contactId, closeEditModal }) => {
   });
   
   useEffect(() => {
+    // Fetch the contact data when the modal is opened and a contactId is provided
+    if (contactId) {
+      fetchEditableContact(contactId);
+    }
+  }, [contactId, fetchEditableContact]);
+
+  useEffect(() => {
+    // Ensure formData is updated with editableContact details
     if (editableContact) {
-      setFormData(editableContact);
+      setFormData({
+        first_name: editableContact.first_name || '',
+        middle_name: editableContact.middle_name || '',
+        last_name: editableContact.last_name || '',
+        email: editableContact.email || '',
+        phone_number_1: editableContact.phone_number_1 || '',
+        phone_number_2: editableContact.phone_number_2 || '',
+        address: editableContact.address || '',
+      });
     }
   }, [editableContact]);
   
-  // Update formData when editableContact is fetched
-  useEffect(() => {
-    if (editableContact) {
-      setFormData(editableContact);
-    }
-  }, [editableContact]);
-
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
@@ -36,10 +45,6 @@ const EditContact = ({ contactId, closeEditModal }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // if (!formData.first_name || !formData.email) {
-    //   console.error('First name and email are required');
-    //   return;
-    // }
     try {
       await updateContact(contactId, formData);
       closeEditModal(); // Close the modal after successful update
