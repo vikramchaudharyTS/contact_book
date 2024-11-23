@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useContactStore } from '../store/store.js'; // Assuming you have this store in the right path
 
-const AddContact = ({setTrackContacts}) => {
-  const { addContact, error, loading } = useContactStore((state) => state);  // Destructure the necessary methods and state
+const AddContact = ({ setTrackContacts }) => {
+  const { addContact, error, loading, dummyRequest } = useContactStore((state) => state);  // Destructure the necessary methods and state
   const [formData, setFormData] = useState({
     firstName: '',
     middleName: '',
@@ -21,12 +21,16 @@ const AddContact = ({setTrackContacts}) => {
       [id]: value,
     }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.firstName || !formData.email) {
+      console.error('First name and email are required');
+      return;
+    }
     try {
-      await addContact(formData);  // Add the contact using the store's action
-      setFormData({  // Clear the form after successful submit
+      await addContact(formData);
+      await dummyRequest();
+      setFormData({
         firstName: '',
         middleName: '',
         lastName: '',
@@ -36,13 +40,14 @@ const AddContact = ({setTrackContacts}) => {
         address: '',
       });
     } catch (err) {
-      console.error(err);  // Handle error if needed
+      console.error(err);
     }
   };
+  
 
   const handleClose = () => {
     setIsOpen(false);  // Close the form
-    setTrackContacts(false)
+    setTrackContacts(false);
   };
 
   if (!isOpen) return null; // If form is closed, return null to hide it
@@ -56,7 +61,7 @@ const AddContact = ({setTrackContacts}) => {
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            <path strokeLinecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
 
@@ -74,7 +79,7 @@ const AddContact = ({setTrackContacts}) => {
               id="firstName"
               value={formData.firstName}
               onChange={handleInputChange}
-              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
+              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />
           </div>
 
@@ -88,7 +93,7 @@ const AddContact = ({setTrackContacts}) => {
               id="middleName"
               value={formData.middleName}
               onChange={handleInputChange}
-              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
+              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />
           </div>
 
@@ -102,7 +107,7 @@ const AddContact = ({setTrackContacts}) => {
               id="lastName"
               value={formData.lastName}
               onChange={handleInputChange}
-              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
+              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />
           </div>
 
@@ -116,7 +121,7 @@ const AddContact = ({setTrackContacts}) => {
               id="email"
               value={formData.email}
               onChange={handleInputChange}
-              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
+              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />
           </div>
 
@@ -130,7 +135,7 @@ const AddContact = ({setTrackContacts}) => {
               id="phone1"
               value={formData.phone1}
               onChange={handleInputChange}
-              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
+              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />
           </div>
 
@@ -144,7 +149,7 @@ const AddContact = ({setTrackContacts}) => {
               id="phone2"
               value={formData.phone2}
               onChange={handleInputChange}
-              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
+              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
             />
           </div>
 
@@ -157,7 +162,7 @@ const AddContact = ({setTrackContacts}) => {
               id="address"
               value={formData.address}
               onChange={handleInputChange}
-              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
+              className="mt-2 sm:mt-0 block w-full sm:w-auto rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none sm:text-sm p-3 bg-gray-100"
               rows="3"
             />
           </div>

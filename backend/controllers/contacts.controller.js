@@ -130,6 +130,16 @@ export const editContact = async (req, res) => {
   }
 };
 
+export const dummyRequest = async (req, res)=>{
+  try {
+    const [rows] = await db.query(`SELECT * from contacts`)
+    return res.json(rows);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: 'Failed to fetch contacts', error });
+  }
+}
+
 // View all contacts (paginated)
 export const getAllContacts = async (req, res) => {
   try {

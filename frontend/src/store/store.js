@@ -58,7 +58,9 @@ export const useContactStore = create((set,get) => ({
         contacts: [],
         loading: false,
         error: null,
+        
         setContacts: (contacts) => set({ contacts }),  // Ensure this is defined
+
         // Add a contact
         addContact: async (contactData) => {
           set({ loading: true });
@@ -68,9 +70,24 @@ export const useContactStore = create((set,get) => ({
             });
             set({ contacts: [...get().contacts, response.data], loading: false });
           } catch (error) {
+            console.log(error.message);
             set({ error: error.message, loading: false });
           }
         },
+
+        dummyRequest: async () => {
+          try {
+            const response = await axiosInstance.get('/dummy/', {
+              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            });
+            console.log(response.data);
+          } catch (error) {
+            console.log(error.message);
+            set({ error: error.message, loading: false });
+          }
+        },
+
+
       
         // Edit a contact
         editContact: async (id, contactData) => {
