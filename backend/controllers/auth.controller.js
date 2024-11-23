@@ -1,15 +1,15 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import db from '../models/';
+import bcrypt from 'bcryptjs';
+import db from '../models/schema.js';
+import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 
 // Register a new user
 export const register = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    const [existingUser] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
 
-    if (existingUser.length > 0) {
+    if (rows.length > 0) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
@@ -25,26 +25,36 @@ export const register = async (req, res) => {
 };
 
 // Login a user
+// Login a user
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const [user] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
 
-    if (user.length === 0) {
+    if (rows.length === 0) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const isMatch = await bcrypt.compare(password, user[0].password);
+    const user = rows[0];
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user[0].id, username: user[0].username }, 'secret_key', { expiresIn: '1h' });
-
+    // Pass user.id to generate the token
+    const token = generateTokenAndSetCookie(res, user.id); // changed user._id to user.id
     res.json({ token });
+
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+
+export const logout = (req, res) => {
+  res.clearCookie("token");
+  res.status(200).json({ message: "Logged out successfully" });
+};
+
