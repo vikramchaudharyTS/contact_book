@@ -1,14 +1,19 @@
-FROM nginx:alpine
+FROM node:20.16.0-alpine AS builder
+
 WORKDIR /app
 
-RUN rm -rf /usr/share/nginx/html/*
+COPY package.json .
 
-COPY ./dist/* /app/
-COPY ./app/* /usr/share/nginx/html/
+RUN npm install 
+
+COPY . .
+
+RUN npm run build
+
+FROM nginx:alpine 
+
+WORKDIR /usr/share/nginx/html
+
+COPY --from=builder /app/dist ./
 
 EXPOSE 80
-
-
-
-
-
