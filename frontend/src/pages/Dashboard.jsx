@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore, useContactStore } from '../store/store'; // Zustand stores
 import { axiosInstance } from '../utils/axios'; // Axios instance
-import Search from '../components/Search';
 import { FaSearch } from "react-icons/fa";
 import AddContact from '../components/AddContacts';
 import Pagination from '../components/Pagination'; // Import the Pagination component
@@ -23,6 +22,8 @@ const Dashboard = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(''); // Track the search query
+  const [trackSearchedContacts, setTrackSearchedContacts] = useState(false);
 
   const handleEditClick = (contactId) => {
     setSelectedContactId(contactId);
@@ -74,6 +75,21 @@ const Dashboard = () => {
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
+
+  // Filter contacts based on search query
+  const filteredContacts = contacts.filter(contact => {
+    if (!searchQuery) return true; // If no search query, return all contacts
+    const lowercasedQuery = searchQuery.toLowerCase();
+    
+    return (
+      (contact.first_name?.toLowerCase().includes(lowercasedQuery) || '') ||
+      (contact.last_name?.toLowerCase().includes(lowercasedQuery) || '') ||
+      (contact.email?.toLowerCase().includes(lowercasedQuery) || '') ||
+      (contact.phone_number_1?.toLowerCase().includes(lowercasedQuery) || '') || // Check phone_number_1
+      (contact.phone_number_2?.toLowerCase().includes(lowercasedQuery) || '')  // Check phone_number_2
+    );
+  });
+  
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -127,8 +143,16 @@ const Dashboard = () => {
             <div className="flex p-2">
               <h2 className="text-xl flex items-center justify-start font-semibold mb-2 w-full">
                 Your Contacts
-                <div className="pl-10"><Search /></div>
-                <button className="pl-3"><FaSearch /></button>
+                <div className="pl-4"><input 
+                  onChange={(e) => setSearchQuery(e.target.value)} 
+                  className='rounded-md px-2 py-1 outline-none text-black text-sm' 
+                  type="text" 
+                  placeholder='Search contact...' 
+                />
+                </div>
+                <button onClick={() => setTrackSearchedContacts(!trackSearchedContacts)} className="pl-3">
+                  <FaSearch />
+                </button>
               </h2>
               <button
                 onClick={() => setTrackRestore(!trackRestore)}
@@ -145,9 +169,9 @@ const Dashboard = () => {
             </div>
 
             <div className="bg-zinc-800 p-4 rounded-lg shadow-md">
-              {contacts.length > 0 ? (
+              {filteredContacts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {contacts.filter(contact => !contact.isDeleted).map((contact) => (
+                  {filteredContacts.filter(contact => !contact.isDeleted).map((contact) => (
                     <div key={contact.id} className="contact-card bg-gray-700 p-4 rounded-lg shadow-md">
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-lg font-semibold">
@@ -186,6 +210,7 @@ const Dashboard = () => {
               handleNextPage={handleNextPage}
               handlePrevPage={handlePrevPage}
             />
+    
           </section>
         </main>
       </div>
