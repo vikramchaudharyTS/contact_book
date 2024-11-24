@@ -1,28 +1,12 @@
 import mysql from 'mysql2';
 
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',      
-  password: 'Panthum#00700',
-  database: 'contact_book',
-  waitForConnections: true,
-  connectionLimit: 10, 
-  queueLimit: 0       
-});
+import dotenv from 'dotenv';
 
-const db = pool.promise(); 
+dotenv.config();
 
-// // Use async function to await the query
-// async function getContacts() {
-//   try {
-//     const [rows] = await db.query('SELECT * FROM users');
-//     console.log(rows);
-//   } catch (error) {
-//     console.error('Error executing query:', error);
-//   }
-// }
+const connectionString = `mysql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
 
-// // Calling the function to fetch data
-// getContacts();
+const pool = mysql.createPool(connectionString);
+const db = pool.promise();
 
 export default db;

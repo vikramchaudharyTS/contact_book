@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useContactStore } from '../store/store'; // Assuming the store is in the right path
+import { useContactStore } from '../store/store'; 
 
 const EditContact = ({ contactId, closeEditModal }) => {
   const { updateContact, editableContact, error, loading, fetchEditableContact } = useContactStore((state) => state);

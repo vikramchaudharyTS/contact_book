@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useContactStore } from '../store/store.js'; // Assuming you have this store in the right path
+import { useContactStore } from '../store/store.js'; 
 
 const AddContact = ({ setTrackContacts }) => {
-  const { addContact, error, loading } = useContactStore((state) => state);  // Destructure the necessary methods and state
-  const [isOpen, setIsOpen] = useState(true); // State to manage the visibility of the form
+  const { addContact, error, loading } = useContactStore((state) => state); 
+  const [isOpen, setIsOpen] = useState(true); 
   const [formData, setFormData] = useState({
     first_name: '',
     middle_name: '',
@@ -47,11 +47,11 @@ const AddContact = ({ setTrackContacts }) => {
   
 
   const handleClose = () => {
-    setIsOpen(false);  // Close the form
+    setIsOpen(false); 
     setTrackContacts(false);
   };
 
-  if (!isOpen) return null; // If form is closed, return null to hide it
+  if (!isOpen) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center my-20">
@@ -174,7 +174,7 @@ const AddContact = ({ setTrackContacts }) => {
             <button
               type="submit"
               className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-300 transform hover:scale-105"
-              disabled={loading}  // Disable the button if loading
+              disabled={loading}
             >
               {loading ? 'Adding Contact...' : 'Submit'}
             </button>

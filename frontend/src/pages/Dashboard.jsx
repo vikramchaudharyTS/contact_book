@@ -4,7 +4,7 @@ import { useAuthStore, useContactStore } from '../store/store'; // Zustand store
 import { axiosInstance } from '../utils/axios'; // Axios instance
 import { FaSearch } from "react-icons/fa";
 import AddContact from '../components/AddContacts';
-import Pagination from '../components/Pagination'; // Import the Pagination component
+import Pagination from '../components/Pagination'; 
 import SoftDelete from '../components/SoftDelete';
 import EditContact from '../components/EditContact';
 
@@ -50,7 +50,7 @@ const Dashboard = () => {
         });
 
         setContacts(response.data.contacts || []); // Update contacts state
-        setTotalPages(Math.ceil(response.data.total / ITEMS_PER_PAGE)); // Use `total` instead of `totalCount` based on API response
+        setTotalPages(Math.ceil(response.data.total / ITEMS_PER_PAGE));
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to fetch contacts:', error);
@@ -85,8 +85,8 @@ const Dashboard = () => {
       (contact.first_name?.toLowerCase().includes(lowercasedQuery) || '') ||
       (contact.last_name?.toLowerCase().includes(lowercasedQuery) || '') ||
       (contact.email?.toLowerCase().includes(lowercasedQuery) || '') ||
-      (contact.phone_number_1?.toLowerCase().includes(lowercasedQuery) || '') || // Check phone_number_1
-      (contact.phone_number_2?.toLowerCase().includes(lowercasedQuery) || '')  // Check phone_number_2
+      (contact.phone_number_1?.toLowerCase().includes(lowercasedQuery) || '') || 
+      (contact.phone_number_2?.toLowerCase().includes(lowercasedQuery) || '') 
     );
   });
   
@@ -171,8 +171,8 @@ const Dashboard = () => {
             <div className="bg-zinc-800 p-4 rounded-lg shadow-md">
               {filteredContacts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredContacts.filter(contact => !contact.isDeleted).map((contact) => (
-                    <div key={contact.id} className="contact-card bg-gray-700 p-4 rounded-lg shadow-md">
+                  {filteredContacts.filter(contact => !contact.isDeleted).map((contact, index) => (
+                    <div key={index} className="contact-card bg-gray-700 p-4 rounded-lg shadow-md">
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-lg font-semibold">
                           {contact.first_name} {contact.last_name}

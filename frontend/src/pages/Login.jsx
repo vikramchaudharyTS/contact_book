@@ -2,21 +2,20 @@
 import Input from "../components/Input";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuthStore } from "../store/store"; // Importing the useAuthStore
+import { useAuthStore } from "../store/store"; 
 
 const Login = () => {
   const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const { login, error, isLoading } = useAuthStore(); // Destructure Login, error, and isLoading from the store
+  const { login, error, isLoading } = useAuthStore();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
       await login(email, password);
-      console.log('User logged in');
       navigate("/dashboard");
     } catch (error) {
       console.log(error.message);

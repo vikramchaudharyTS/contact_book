@@ -10,8 +10,7 @@ const SoftDelete = ({ setTrackRestore }) => {
     useEffect(() => {
         const fetchDeletedContacts = async () => {
             try {
-                const response = await axiosInstance.get('/contacts/deleted'); // Adjust the API endpoint as needed
-                console.log(response.data); // Make sure data structure is correct
+                const response = await axiosInstance.get('/contacts/deleted'); 
                 setDeletedContacts(response.data);
             } catch (error) {
                 console.error('Error fetching deleted contacts:', error);
@@ -48,7 +47,7 @@ const SoftDelete = ({ setTrackRestore }) => {
                 ) : deletedContacts.length > 0 ? (
                     <div>
                         {deletedContacts.map((contact) => (
-                            // Ensure that contact first_name and last_name exist and are not empty
+                            // Ensuring that contact first_name and last_name exist and are not empty
                             <div key={contact.id} className="flex justify-between items-center mb-3 bg-gray-700/50 px-2 py-1 rounded-md">
                                 <div>
                                     <span className="text-lg">

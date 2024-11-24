@@ -42,9 +42,7 @@ export const login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-
-    // Pass user.id to generate the token
-    const token = generateTokenAndSetCookie(res, user.id); // changed user._id to user.id
+    const token = generateTokenAndSetCookie(res, user.id); 
     res.json({ token, user });
 
   } catch (error) {

@@ -1,4 +1,6 @@
--- Table to store user information
+-- This is the schema used in this project
+
+-- User table
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -7,7 +9,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table to store contact information
+-- contacts table
 CREATE TABLE contacts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL, -- Foreign key linking to the user who owns the contact
@@ -24,6 +26,7 @@ CREATE TABLE contacts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
 
 -- Indexes for optimized searching
 CREATE INDEX idx_full_name ON contacts (first_name, last_name);

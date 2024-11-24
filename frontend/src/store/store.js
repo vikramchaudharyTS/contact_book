@@ -4,7 +4,7 @@ import { axiosInstance } from '../utils/axios.js';
 // Auth store to manage user and token
 export const useAuthStore = create((set) => ({
   user: null,
-  token: null, // Load token from localStorage
+  token: null, 
   error: null,
   isLoading: false,
 
@@ -39,11 +39,8 @@ export const useAuthStore = create((set) => ({
   logOut: async () => {
     try {
       // Make a request to backend to clear the authentication cookie
-      await axiosInstance.post('/auth/logout'); // You will need to implement this in your backend
-
-      // Clear the user and token from the store
+      await axiosInstance.post('/auth/logout');
       set({ user: null, token: null, error: null });
-      // Remove the token from localStorage
       localStorage.removeItem('token');
     } catch (error) {
       set({ error: 'Logout failed', isLoading: false });
@@ -60,7 +57,7 @@ export const useContactStore = create((set, get) => ({
   error: null,
   editableContact: null,
 
-  setContacts: (contacts) => set({ contacts }),  // Ensure this is defined
+  setContacts: (contacts) => set({ contacts }), 
 
   // Add a contact
   addContact: async (contactData) => {
@@ -95,7 +92,7 @@ export const useContactStore = create((set, get) => ({
     try {
       // Updated URL with query parameter for search term
       const response = await axiosInstance.get(`/contacts/search-one`, {
-        params: { searchTerm }, // Sending search term as query parameter
+        params: { searchTerm }, 
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       set({ contacts: response.data.contacts, loading: false });

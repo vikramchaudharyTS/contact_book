@@ -3,22 +3,22 @@ import Input from "../components/Input";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
-import { useAuthStore } from "../store/store"; // Importing the useAuthStore
+import { useAuthStore } from "../store/store";
 
 const Register = () => {
-  const [username, setUsername] = useState("");  // Change from 'name' to 'username'
+  const [username, setUsername] = useState("");  
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const { register, error, isLoading } = useAuthStore(); // Destructure Register, error, and isLoading from the store
+  const { register, error, isLoading } = useAuthStore();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
 
     try {
-      await register(email, password, username);  // Use 'username' instead of 'name'
+      await register(email, password, username); 
       console.log('user created');
       navigate("/login");
     } catch (error) {
@@ -37,9 +37,9 @@ const Register = () => {
         <form onSubmit={handleSignUp}>
           <Input
             type="text"
-            placeholder="Username"  // Change placeholder to reflect 'Username'
+            placeholder="Username" 
             value={username}
-            onChange={(e) => setUsername(e.target.value)}  // Update to 'username'
+            onChange={(e) => setUsername(e.target.value)}  
           />
 
           <Input

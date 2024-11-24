@@ -1,4 +1,4 @@
-import { FaSearch } from 'react-icons/fa'; // Example, replace with desired icon library
+import { FaSearch } from 'react-icons/fa'; 
 
 const Input = ({ ...props }) => {
   return (

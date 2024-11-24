@@ -1,50 +1,5 @@
 import db from '../models/schema.js';
 
-
-// Get user profile with contacts
-export const searchContacts = async (req, res) => {
-  const query = req.body; // Search term from the request body
-
-  if (!query) {
-    return res.status(400).json({ message: 'Search query is required' });
-  }
-
-  try {
-    // Create a case-insensitive regular expression for the search term
-    const regex = new RegExp(query, 'i'); // 'i' makes the search case-insensitive
-
-    // Build the WHERE clause dynamically to only use REGEXP when query is provided
-    const whereClause = [
-      'first_name REGEXP ?',
-      'middle_name REGEXP ?',
-      'last_name REGEXP ?',
-      'email REGEXP ?',
-      'phone_number_1 REGEXP ?',
-      'phone_number_2 REGEXP ?',
-    ];
-
-    // Query the database to search across multiple fields
-    const [contacts] = await db.query(
-      `SELECT id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address, created_at
-       FROM contacts
-       WHERE user_id = ? AND is_deleted = FALSE
-       AND (${whereClause.join(' OR ')})
-       ORDER BY created_at DESC`,
-      [req.userId, regex, regex, regex, regex, regex, regex]
-    );
-
-    if (contacts.length === 0) {
-      return res.status(404).json({ message: 'No contacts found matching your query' });
-    }
-
-    res.json({ contacts });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error occurred while searching contacts', error });
-  }
-};
-
-
 // Get user profile with contacts
 export const getUserProfile = async (req, res) => {
   const userId = req.userId; // Assuming userId is set by middleware
@@ -185,7 +140,7 @@ export const getAllContacts = async (req, res) => {
 
 // Search contacts
 export const getOneContact = async (req, res) => {
-  const { searchTerm } = req.query; // Assuming you're sending the search term in the query parameter
+  const { searchTerm } = req.query; 
   try {
     const query = `
       SELECT id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address, created_at, updated_at
@@ -224,7 +179,7 @@ export const getOneContact = async (req, res) => {
 // Soft delete a contact
 export const softDeleteContact = async (req, res) => {
   const contactId = req.params.id;
-  const user_id = req.userId; // Assuming user is authenticated and userId is set by middleware
+  const user_id = req.userId; 
 
   try {
 
@@ -250,6 +205,8 @@ export const softDeleteContact = async (req, res) => {
   }
 };
 
+
+
 export const restoreSoftDeletedContact = async (req, res) => {
   const contactId = req.params.id;
   const user_id = req.userId;
@@ -264,7 +221,7 @@ export const restoreSoftDeletedContact = async (req, res) => {
       return res.status(404).json({ message: 'Contact not found or already processed' });
     }
 
-    // Restore the contact by unmarking it as deleted
+    
     await db.query(
       'UPDATE contacts SET is_deleted = FALSE, deleted_at = NULL WHERE id = ?',
       [contactId]
@@ -272,21 +229,19 @@ export const restoreSoftDeletedContact = async (req, res) => {
 
     res.json({ message: 'Contact restored successfully', contactId });
   } catch (error) {
-    console.error('Error restoring contact:', error);  // Add error logging
+    console.error('Error restoring contact:', error);  
     res.status(500).json({ message: 'Server error', error });
   }
 };
 
 export const getOnlyDeletedContacts = async (req, res) => {
-  const user_id = req.userId; // The ID of the logged-in user
+  const user_id = req.userId; 
   try {
     // Fetch deleted contacts from the database
     const result = await db.query(
       'SELECT id, first_name, last_name, email FROM contacts WHERE user_id = ? AND is_deleted = TRUE',
       [user_id]
     );
-
-    // The result might contain both the data and schema/metadata
     const contacts = result[0]; // Get the first element, which contains the contact data
 
     // Map through the contacts to return only necessary fields
@@ -296,8 +251,6 @@ export const getOnlyDeletedContacts = async (req, res) => {
       last_name: contact.last_name,
       email: contact.email
     }));
-
-    // Send the contacts back as a response
     res.json(deletedContacts);
   } catch (error) {
     console.error('Error fetching deleted contacts:', error);
