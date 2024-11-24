@@ -48,6 +48,7 @@ const EditContact = ({ contactId, closeEditModal }) => {
     try {
       await updateContact(contactId, formData);
       closeEditModal(); // Close the modal after successful update
+      
     } catch (err) {
       console.error(err);
     }

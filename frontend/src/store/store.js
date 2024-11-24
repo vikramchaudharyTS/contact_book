@@ -89,14 +89,16 @@ export const useContactStore = create((set, get) => ({
     }
   },
 
-  // Fetch one contact by ID
-  getOneContact: async (id) => {
+  // Fetch contacts based on a search term
+  getContactsBySearchTerm: async (searchTerm) => {
     set({ loading: true });
     try {
-      const response = await axiosInstance.get(`/contacts/search-one/${id}`, {
+      // Updated URL with query parameter for search term
+      const response = await axiosInstance.get(`/contacts/search-one`, {
+        params: { searchTerm }, // Sending search term as query parameter
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
-      set({ contacts: [response.data], loading: false });
+      set({ contacts: response.data.contacts, loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });
     }
@@ -120,25 +122,25 @@ export const useContactStore = create((set, get) => ({
     }
   },
 
-   
-  // Function to fetch editable contact data
-fetchEditableContact: async (contactId) => {
-  set({ loading: true, error: null });
-  try {
-    const response = await axiosInstance.get(`/contacts/edit/${contactId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
 
-    const contact = Array.isArray(response.data.contact) ? response.data.contact[0] : response.data.contact;
-    
-    set({ editableContact: contact, loading: false }); 
-  } catch (error) {
-    set({
-      error: error.response?.data?.message || 'Failed to fetch contact data',
-      loading: false,
-    });
-  }
-},
+  // Function to fetch editable contact data
+  fetchEditableContact: async (contactId) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axiosInstance.get(`/contacts/edit/${contactId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+
+      const contact = Array.isArray(response.data.contact) ? response.data.contact[0] : response.data.contact;
+
+      set({ editableContact: contact, loading: false });
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || 'Failed to fetch contact data',
+        loading: false,
+      });
+    }
+  },
 
 
   // update a contact

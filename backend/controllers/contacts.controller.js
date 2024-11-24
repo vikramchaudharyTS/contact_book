@@ -183,29 +183,44 @@ export const getAllContacts = async (req, res) => {
   }
 };
 
-
-
 // Search contacts
 export const getOneContact = async (req, res) => {
-  const { id } = req.params;
+  const { searchTerm } = req.query; // Assuming you're sending the search term in the query parameter
   try {
-    const [contact] = await db.query(
-      `SELECT id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address, created_at, updated_at 
-       FROM contacts 
-       WHERE id = ? AND user_id = ? AND is_deleted = FALSE`,
-      [id, req.userId]
-    );
+    const query = `
+      SELECT id, first_name, middle_name, last_name, email, phone_number_1, phone_number_2, address, created_at, updated_at
+      FROM contacts
+      WHERE user_id = ? AND is_deleted = FALSE
+      AND (
+        first_name LIKE ? OR
+        middle_name LIKE ? OR
+        last_name LIKE ? OR
+        email LIKE ? OR
+        phone_number_1 LIKE ? OR
+        phone_number_2 LIKE ?
+      )
+    `;
 
-    if (!contact || contact.length === 0) {
-      return res.status(404).json({ message: 'Contact not found' });
+    // Sanitize search term to prevent SQL injection
+    const searchPattern = `%${searchTerm}%`;
+
+    const [contacts] = await db.query(query, [
+      req.userId,
+      searchPattern, searchPattern, searchPattern, searchPattern, searchPattern, searchPattern
+    ]);
+
+    if (contacts.length === 0) {
+      return res.status(404).json({ message: 'No contacts found' });
     }
 
-    res.json({ contact: contact[0] });
+    res.json({ contacts });
 
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch contact', error });
+    res.status(500).json({ message: 'Failed to search contacts', error });
   }
 };
+
+
 // Soft delete a contact
 export const softDeleteContact = async (req, res) => {
   const contactId = req.params.id;
