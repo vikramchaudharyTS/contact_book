@@ -14,7 +14,7 @@ app.use(cors({
     origin: 'https://contact-book-wk41.vercel.app',
     credentials: true,
     methods:["GET","PUT","POST","DELETE"] 
-})); 
+}));
 app.use(morgan('dev'));
 
 app.use(cookieParser())
